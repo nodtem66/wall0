@@ -1,0 +1,332 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+          "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+  <head>
+    <title>QUnit/Sinon.JS</title>
+    <link rel="stylesheet" href="qunit.css" type="text/css" media="screen">
+  </head>
+  <body>
+    <h1 id="qunit-header">QUnit/Sinon.JS Test</h1>
+    <h2 id="qunit-banner"></h2>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests"></ol>
+    <div id="test-area"></div>
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="qunit.js"></script>
+    <script type="text/javascript" src="sinon-1.2.0.js"></script>
+    <script type="text/javascript" src="sinon-ie-1.2.0.js"></script>
+    <script type="text/javascript" src="sinon-qunit-1.0.0.js"></script>
+    <script type="text/javascript" src="../src/lib.js"></script>
+    <script>
+    
+    		function fireEvent(element,event){
+		    if (document.createEventObject){
+		    // dispatch for IE
+		    var evt = document.createEventObject();
+		    return element.fireEvent('on'+event,evt);
+		    }else{
+		    // dispatch for firefox + others
+		    var evt = document.createEvent("HTMLEvents");
+		    evt.initEvent(event, true, true ); // event type,bubbling,cancelable
+		    return !element.dispatchEvent(evt);
+		    }}
+    
+    	module("lib0.env");
+    	
+    	test("test browser detection",function(){
+    		var _ = lib0.env;
+    		expect(2);
+    		equal(false,_.ie6 && _.ie7 && _.ie8 && _.firefox && _.webkit && _.opera && _.camino,"one prop must be true");
+    		equal(true,_.ie6 || _.ie7 || _.ie8 || _.firefox || _.webkit || _.opera || _.camino,"other props must be false");				    		
+    	});
+    	
+    	
+    	module("lib0.addEvent");
+    	test("click",function(){
+    		var fn = sinon.spy();
+    		lib0.addEvent(document.body,"click",fn);
+    		fireEvent(document.body, "click");
+    		equal(fn.called, true);
+    		
+    	});
+    	test("mousedown",function(){
+    		var fn = sinon.spy();
+    		lib0.addEvent(document.body,"mousedown",fn);
+    		fireEvent(document.body, "mousedown", fn);
+    		equal(fn.called, true); 		
+    	});
+    	
+    	module("lib0.removeEvent");
+    	test("click",function(){
+    		var fn = sinon.spy();
+    		lib0.addEvent(document.body, "click", fn);
+    		lib0.removeEvent(document.body, "click", fn);
+    		fireEvent(document.body, "click");
+    		equal(fn.called, false);
+    	});
+    	
+    	module("lib0.getEvent");
+    	test("get event from click", function(){
+    		var inside = function(e){
+    			return lib0.getEvent(e);
+    		};
+    		var fn = sinon.spy(lib0,"getEvent");
+    		lib0.addEvent(document.body, "click", inside);
+    		fireEvent(document.body, "click");
+    		lib0.removeEvent(document.body, "click", fn);
+    		equal(fn.called,true);
+  
+    		equal(typeof(fn.getCall(0).returnValue.target) === "object", true);
+    		equal(typeof(fn.getCall(0).returnValue.preventDefault) === "function", true);    		
+    	});
+    	
+    	module("lib0.getTargetFromEvent");
+    	test("get document.body", function(){
+    		var fn = function(e){ lib0.getTargetFromEvent(e); };
+    		sinon.spy(lib0,"getTargetFromEvent"); 
+    		lib0.addEvent(document.body, "click", fn);
+    		fireEvent(document.body, "click");
+    		lib0.removeEvent(document.body, "click", fn);
+    		equal(lib0.getTargetFromEvent.called, true);
+    		equal(lib0.getTargetFromEvent.returnValues[0], document.body);
+    	});
+    	
+    	module("lib0.onDomReady");
+    	test("load",function(){
+    		var fn = sinon.spy();
+    		lib0.onDomReady(fn);
+    		fireEvent(document.body,"load");
+    		equal(fn.called, true);    		
+    	});
+    	
+    	module("lib0.getArrayOfClassNames");
+    	test("class=\"apple banana orange\"",function(){
+    		var fn = sinon.spy(lib0,"getArrayOfClassNames");
+    		var test_elm = $("#test-area");
+    		test_elm.addClass("apple banana orange");
+    		fn(test_elm[0]);
+    		ok(fn.called, "fn called");
+    		deepEqual(fn.returnValues[0], ["apple","banana","orange"]);
+    		test_elm.removeClass("apple banana orange");
+    		fn.restore();
+    	});
+    	test("class=\" apple  banana \"", function(){
+    		var fn = sinon.spy(lib0, "getArrayOfClassNames");
+    		fn({"className": " apple  banana "});
+    		deepEqual(fn.returnValues[0], ["apple","banana"], "['apple','banana']");
+    		fn.restore();
+    	});
+    	
+    	module("lib0.addClass");
+    	test("add class \"c d\" to \"a b\"", function(){
+    		var test_elm = $("#test-area");
+    		var fn = sinon.spy(lib0, "addClass");
+    		
+    		test_elm.addClass(" a b");
+    		fn(test_elm[0], " c d ");
+    		deepEqual(lib0.getArrayOfClassNames(test_elm[0]).sort(),["a","b","c","d"]);
+    		test_elm.removeClass("a b c d");
+    		fn.restore();
+    	});
+    	test("add class \"c a\" to \"a b\"", function(){
+    		var test_elm = $("#test-area");
+    		var fn = sinon.spy(lib0, "addClass");
+    		
+    		test_elm.addClass(" a b");
+    		fn(test_elm[0], " c a");
+    		deepEqual(lib0.getArrayOfClassNames(test_elm[0]).sort(),["a","b","c"]);
+    		test_elm.removeClass("a b c");
+    		fn.restore();
+    	});
+    	module("lib0.removeClass");
+    	test("remove class \"c a\" to \"a b\"", function(){
+    		var test_elm = $("#test-area");
+    		var fn = sinon.spy(lib0, "removeClass");
+    		
+    		test_elm.addClass(" a b");
+    		fn(test_elm[0], " c a");
+    		deepEqual(lib0.getArrayOfClassNames(test_elm[0]).sort(),["b"]);
+    		test_elm.removeClass("a b c");
+    		fn.restore();
+    	});
+    	module("lib0.hasClass");
+    	test("\"a b c\" has \"b\"", function(){
+    		var fn = sinon.spy(lib0,"hasClass");
+    		fn({"className":"a b c "},"b");
+    		fn({"className":"a b c "}," ");
+    		fn({"className":"a b c "}," b ");
+    		fn({"className":"a b c "}," b a ");
+    		
+    		equal(fn.returnValues[0], true, '"a b c" has "b" ');
+    		equal(fn.returnValues[1], false, '"a b c" did not have " " ');
+    		equal(fn.returnValues[2], true, '"a b c" has " b " ');
+    		equal(fn.returnValues[3], true, '"a b c" has " b a " ');
+    		fn.restore();
+    	});
+    	module("lib0.getObjectOfStyle");
+    	test("get style=\" width: 100px; height: 10px; color: red; \"", function(){
+    		var fn = sinon.spy(lib0,"getObjectOfStyle");
+    		var elm = $("#test-area")[0];
+    		elm.innerHTML = "<p style=\" width: 100px; height: 10px; color: red; \"><\/p>";
+    		fn(elm.firstChild);
+    		deepEqual(fn.returnValues[0],{"width": "100px", "height": "10px", "color": "red"});
+    		elm.innerHTML = "";
+    		fn.restore();    		
+    	});
+    	test("get style=\" ;width: 100px; ; \"", function(){
+    		var fn = sinon.spy(lib0,"getObjectOfStyle");
+    		var elm = $("#test-area")[0];
+    		elm.innerHTML = "<p style=\" ;width: 100px; ; \"><\/p>";
+    		fn(elm.firstChild);
+    		deepEqual(fn.returnValues[0],{"width": "100px"});
+    		elm.innerHTML = "";
+    		fn.restore();    		
+    	});
+    	module("lib0.setObjectOfStyle");
+    	test("set {width: 100px, color: red}", function(){
+    		var fn = sinon.spy(lib0,"setObjectOfStyle");
+    		var elm = $("#test-area")[0];
+    		elm.innerHTML = "<p><\/p>";
+    		fn(elm.firstChild, {"width":"100px","color":"red"});
+    		deepEqual(lib0.getObjectOfStyle(elm.firstChild),{"width": "100px","color":"red"});
+    		elm.innerHTML = "";
+    		fn.restore();    		
+    	});
+    	module("lib0.addStyle");
+    	test("addstyle \"width: 100px;color: red\" to style\"\"", function(){
+    		var fn = sinon.spy(lib0,"addStyle");
+    		var elm = $("#test-area")[0];
+    		elm.innerHTML = "<p><\/p>";
+    		fn(elm.firstChild, {"width":"100px","color":"red"});
+    		deepEqual(lib0.getObjectOfStyle(elm.firstChild),{"width": "100px","color":"red"});
+    		elm.innerHTML = "";
+    		fn.restore();    		
+    	});
+    	test("addstyle \"height: 100px;color: green\" to style \"width:100px;color:red;\"", function(){
+    		var fn = sinon.spy(lib0,"addStyle");
+    		var elm = $("#test-area")[0];
+    		elm.innerHTML = "<p style=\"width:100px;color:red;\"><\/p>";
+    		fn(elm.firstChild, {"height":"100px","color":"green"});
+    		deepEqual(lib0.getObjectOfStyle(elm.firstChild),{"width": "100px","height":"100px","color":"green"});
+    		elm.innerHTML = "";
+    		fn.restore();    		
+    	});
+    	
+    	module("lib0.removeStyle");
+    	test("removestyle \"color:red;\" from \"width: 100px;color: red; height: 200px;\"", function(){
+    		var fn = sinon.spy(lib0,"removeStyle");
+    		var elm = $("#test-area")[0];
+    		elm.innerHTML = "<p style=\"width: 100px;color: red; height: 200px;\"><\/p>";
+    		fn(elm.firstChild, {"color":"red"});
+    		deepEqual(lib0.getObjectOfStyle(elm.firstChild),{"width": "100px","height":"200px"});
+    		elm.innerHTML = "";
+    		fn.restore();    		
+    	});
+    	
+    	module("lib0.setNode");
+    	test("build p with style\"color:red;\" and text \"hello world\"",function(){
+    		var elm = $("#test-area")[0];
+    		elm.appendChild(lib0.setNode({tag:"p",attr: {"style": "color:red;"},html: "hello world"}));
+    		
+    		equal(elm.innerHTML, "<p style=\"color:red;\">hello world<\/p>");
+    		
+    		elm.innerHTML = "";
+    		
+    	});
+    	test("build div with id\"content\"",function(){
+    		var elm = $("#test-area")[0];
+    		elm.appendChild(lib0.setNode({attr: {"id": "content"}}));
+    		
+    		equal(elm.innerHTML, "<div id=\"content\"><\/div>");
+    		
+    		elm.innerHTML = "";
+    	});
+    	test("change div#content to div#body",function(){
+    		var elm = $("#test-area")[0];
+    		elm.appendChild(lib0.setNode({attr: {"id": "content"}}));
+    		lib0.setNode(elm.firstChild,{attr: {"id": "body"}});
+    		
+    		equal(elm.innerHTML, "<div id=\"body\"><\/div>");
+    		
+    		elm.innerHTML = "";
+    	});
+    	
+    	module("lib0.bind");
+    	test("test curry, bind, and throttle function", function(){
+    		var clock = sinon.useFakeTimers();
+    		var timer_spy = sinon.spy(); 
+    		var add = function(a,b,c){timer_spy.call(this);return a+b+c;};
+    		var new_add_spy = sinon.spy(lib0.bind(add, null, 100,3,4));
+    		var test_1_spy = sinon.spy(lib0.bind(add, null, false,3,4));
+    		var test_2_spy = sinon.spy(lib0.bind(add, sinon, false));
+    		
+    		
+    		test_1_spy(10);
+    		test_2_spy(10,8,7);
+    		setInterval(function(){new_add_spy(5);},1);
+    		clock.tick(1010);
+    		
+    		equal(test_1_spy.returnValues[0], 17);
+    		equal(test_2_spy.returnValues[0], 25);
+    		equal(timer_spy.calledOn(sinon), true);
+    		equal(timer_spy.callCount, 12);
+    		
+    		clock.restore();
+    	});
+    	
+    	module("lib0.detectMedia");
+    	test("detect text",function(){
+    		var elm = lib0.setNode({tag: "p"});
+    		equal(lib0.detectMedia(elm), "text", "<p> is text");
+    		var elm = lib0.setNode({tag: "span"});
+    		equal(lib0.detectMedia(elm), "text", "<span> is text");
+    		var elm = lib0.setNode({tag: "div"});
+    		equal(lib0.detectMedia(elm), "text", "<div> is text");
+    		var elm = lib0.setNode({tag: "img"});
+    		equal(lib0.detectMedia(elm), "image", "<img> is image");
+    		var elm = lib0.setNode({tag: "iframe"});
+    		equal(lib0.detectMedia(elm), "iframe", "<iframe> is iframe");
+    		var elm = lib0.setNode({tag: "object"});
+    		equal(lib0.detectMedia(elm), "media", "<object> is media");
+    		var elm = lib0.setNode({tag: "video"});
+    		equal(lib0.detectMedia(elm), "media", "<video> is media");
+    		var elm = lib0.setNode({tag: "embed"});
+    		equal(lib0.detectMedia(elm), "media", "<embed> is media");
+    		var elm = lib0.setNode({role: "image"});
+    		equal(lib0.detectMedia(elm), "image", "<div role=\"image\"> is image");
+    		var elm = lib0.setNode({role: "iframe"});
+    		equal(lib0.detectMedia(elm), "iframe", "<div role=\"iframe\"> is iframe");
+    		var elm = lib0.setNode({role: "media"});
+    		equal(lib0.detectMedia(elm), "media", "<div role=\"media\"> is media");
+    		
+    		equal(lib0.detectMedia("<img><\/img>"),"image", "<img \/> is imgage");
+    		equal(lib0.detectMedia("<iframe><\/iframe>"),"iframe", "<iframe> is imgage");
+    		equal(lib0.detectMedia("<object><\/embed>"),undefined, "<object><\/embed> is undefined");
+    		equal(lib0.detectMedia("<video><\/video>"),"media", "<video> is media");
+    		equal(lib0.detectMedia("<embed><\/embed>"),"media", "<embed> is media");
+    		equal(lib0.detectMedia("<object><\/object>"),"media", "<object> is media");
+    		equal(lib0.detectMedia("<p><\/p>"),"text", "other is text");
+    	});
+    	
+    	module("lib0.request");
+    	test("AJAX to /id/12",function(){
+    		var server = sinon.fakeServer.create();
+    		var callback = sinon.spy();
+    		
+    		server.respondWith(/\/id\/(\d+)\/\??(.+)?/, function(xhr, id, data){
+    			xhr.respond(200, {"Content-Type":"application/json"}, '{"id": '+ id +',"type": "'+ server.getHTTPMethod(xhr) +'"}');
+    		});
+  
+    		lib0.request({url:"/id/12/"},callback);
+    		lib0.request({url:"/id/12/",method:"POST"},callback);
+    		server.respond();
+
+    		equal(callback.calledWith('{"id": 12,"type": "GET"}'), true);
+    		equal(callback.calledWith('{"id": 12,"type": "POST"}'), true);
+    		
+    		server.restore();
+    	});
+    	
+    </script>
+  </body>
+</html>
