@@ -16,21 +16,22 @@
     <script type="text/javascript" src="sinon-1.2.0.js"></script>
     <script type="text/javascript" src="sinon-ie-1.2.0.js"></script>
     <script type="text/javascript" src="sinon-qunit-1.0.0.js"></script>
-    <script type="text/javascript" src="../src/lib.js"></script>
+    <script data-main="../src/wall0/lib" type="text/javascript" src="../src/require.js"></script>
     <script>
-    
-    		function fireEvent(element,event){
-		    if (document.createEventObject){
-		    // dispatch for IE
-		    var evt = document.createEventObject();
-		    return element.fireEvent('on'+event,evt);
-		    }else{
-		    // dispatch for firefox + others
-		    var evt = document.createEvent("HTMLEvents");
-		    evt.initEvent(event, true, true ); // event type,bubbling,cancelable
-		    return !element.dispatchEvent(evt);
-		    }}
-    
+	function fireEvent(element,event){
+	if (document.createEventObject){
+	// dispatch for IE
+	var evt = document.createEventObject();
+	return element.fireEvent('on'+event,evt);
+	}else{
+	// dispatch for firefox + others
+	var evt = document.createEvent("HTMLEvents");
+	evt.initEvent(event, true, true ); // event type,bubbling,cancelable
+	return !element.dispatchEvent(evt);
+	}}
+	require.config({urlArgs: 'v='+ (new Date()).getTime()});
+	require(['lib'],function(lib0){
+		   
     	module("lib0.env");
     	
     	test("test browser detection",function(){
@@ -90,15 +91,7 @@
     		equal(lib0.getTargetFromEvent.called, true);
     		equal(lib0.getTargetFromEvent.returnValues[0], document.body);
     	});
-    	
-    	module("lib0.onDomReady");
-    	test("load",function(){
-    		var fn = sinon.spy();
-    		lib0.onDomReady(fn);
-    		fireEvent(document.body,"load");
-    		equal(fn.called, true);    		
-    	});
-    	
+    	    	
     	module("lib0.getArrayOfClassNames");
     	test("class=\"apple banana orange\"",function(){
     		var fn = sinon.spy(lib0,"getArrayOfClassNames");
@@ -172,6 +165,7 @@
     		deepEqual(fn.returnValues[0],{"width": "100px", "height": "10px", "color": "red"});
     		elm.innerHTML = "";
     		fn.restore();    		
+			
     	});
     	test("get style=\" ;width: 100px; ; \"", function(){
     		var fn = sinon.spy(lib0,"getObjectOfStyle");
@@ -222,22 +216,40 @@
     		elm.innerHTML = "";
     		fn.restore();    		
     	});
+		module("lib0.getPropStyle");
+		test("get color from ", function(){
+			var elm = $("#test-area")[0];
+			elm.innerHTML = "<p style=\"width: 100px;color: red; height: 200px;\"><\/p>";
+			equal(lib0.getPropStyle(elm.firstChild,'color'),'red');
+			equal(parseInt(lib0.getPropStyle(elm.firstChild,'width')),100);
+			elm.innerHTML = "";
+		});
+		test("get x,y from ", function(){
+			var elm = $("#test-area")[0];
+			elm.innerHTML = "<p style=\"width: 100px;color: red; height: 200px;\"><\/p>";
+			notEqual(lib0.getPageX(elm.firstChild),undefined);
+			notEqual(lib0.getPageY(elm.firstChild),undefined);
+			notEqual(lib0.getParentX(elm.firstChild),undefined);
+			notEqual(lib0.getParentY(elm.firstChild),undefined);
+			elm.innerHTML = "";
+		});
     	
     	module("lib0.setNode");
     	test("build p with style\"color:red;\" and text \"hello world\"",function(){
-    		var elm = $("#test-area")[0];
-    		elm.appendChild(lib0.setNode({tag:"p",attr: {"style": "color:red;"},html: "hello world"}));
     		
-    		equal(elm.innerHTML, "<p style=\"color:red;\">hello world<\/p>");
+			var elm = $("#test-area");
+    		elm[0].appendChild(lib0.setNode({tag:"p",attr: {"style": "color:red;"},html: "hello world"}));
     		
-    		elm.innerHTML = "";
+    		deepEqual(lib0.getObjectOfStyle(elm[0].firstChild), {"color":"red"});
+    		
+    		elm[0].innerHTML = "";
     		
     	});
     	test("build div with id\"content\"",function(){
     		var elm = $("#test-area")[0];
     		elm.appendChild(lib0.setNode({attr: {"id": "content"}}));
     		
-    		equal(elm.innerHTML, "<div id=\"content\"><\/div>");
+    		equal(/<div id=\"?content\"?><\/div>/i.test(elm.innerHTML), true);
     		
     		elm.innerHTML = "";
     	});
@@ -246,7 +258,7 @@
     		elm.appendChild(lib0.setNode({attr: {"id": "content"}}));
     		lib0.setNode(elm.firstChild,{attr: {"id": "body"}});
     		
-    		equal(elm.innerHTML, "<div id=\"body\"><\/div>");
+    		equal(/<div id=\"?body\"?><\/div>/i.test(elm.innerHTML), true);
     		
     		elm.innerHTML = "";
     	});
@@ -326,7 +338,7 @@
     		
     		server.restore();
     	});
-    	
+	});
     </script>
   </body>
 </html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+          "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+  <head>
+    <title>QUnit/Sinon.JS</title>
+    <link rel="stylesheet" href="qunit.css" type="text/css" media="screen">
+  </head>
+  <body>
+    <h1 id="qunit-header">QUnit/Sinon.JS Test</h1>
+    <h2 id="qunit-banner"></h2>
+    <h2 id="qunit-userAgent"></h2>
+    <ol id="qunit-tests"></ol>
+    <div id="test-area"></div>
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript" src="qunit.js"></script>
+    <script type="text/javascript" src="sinon-1.2.0.js"></script>
+    <script type="text/javascript" src="sinon-ie-1.2.0.js"></script>
+    <script type="text/javascript" src="sinon-qunit-1.0.0.js"></script>
+    <script data-main="../src/wall0/lib" type="text/javascript" src="../src/require.js"></script>
+    <script>
+	
+	require.config({urlArgs: 'v='+ (new Date()).getTime()});
+	require(['history'],function(History){
+
+		module('History');
+		test('history.save', function(){
+			var mylog = function(d){return d;},
+				fn = sinon.spy(mylog),
+				h = History(10,fn);
+			h.init('init1');
+			h.save('test1.1');
+			h.undo();
+			ok(fn.called);
+			equal(fn.returnValues[0],'init1');
+			h.clear();
+		});
+		test('history.undo', function(){
+			var mylog = function(d){return d;},
+				h = History(10,mylog),
+				fn = sinon.spy(h,'undo');
+			h.init('init2');
+			for(var i=1;i<=10;i++){
+				h.save('test'+i+'.2');
+			}
+			for(var i=1;i<=10;i++){
+				h.undo();
+			}
+			ok(fn.called);
+			equal(fn.returnValues[0],'test9.2');
+			equal(fn.returnValues[1],'test8.2');
+			equal(fn.returnValues[2],'test7.2');
+			equal(fn.returnValues[3],'test6.2');
+			equal(fn.returnValues[4],'test5.2');
+			equal(fn.returnValues[5],'test4.2');
+			equal(fn.returnValues[6],'test3.2');
+			equal(fn.returnValues[7],'test2.2');
+			equal(fn.returnValues[8],'test1.2');
+			equal(fn.returnValues[9],undefined);
+			h.clear();
+		});
+		test('history.redo', function(){
+			var mylog = function(d){return d;},
+				h = History(5,mylog),
+				fn = sinon.spy(h,'undo');
+				fn1 = sinon.spy(h,'redo');
+			h.init('init3'); 
+			for(var i=1;i<=5;i++){
+				h.save('test'+i+'.3');
+			}			
+			for(var i=1;i<=5;i++){
+				h.undo();
+				console.log(i);
+			}
+			for(var i=1;i<=5;i++){
+				h.redo();
+			}
+			ok(fn.called);
+			equal(fn.returnValues[0],'test4.3');
+			equal(fn.returnValues[1],'test3.3');
+			equal(fn.returnValues[2],'test2.3');
+			equal(fn.returnValues[3],'test1.3');
+			equal(fn.returnValues[4],undefined);
+			equal(fn1.returnValues[0],'test2.3');
+			equal(fn1.returnValues[1],'test3.3');
+			equal(fn1.returnValues[2],'test4.3');
+			equal(fn1.returnValues[3],'test5.3');
+			equal(fn1.returnValues[4],undefined);
+			h.clear();
+		});
+		test('history freeze/unfreeze', function(){
+			var mylog = function(d){return d;},
+				h = History(5,mylog),
+				fn = sinon.spy(h,'undo');
+				fn1 = sinon.spy(h,'redo');
+			h.init('init3'); 
+			for(var i=1;i<=5;i++){
+				h.save('test'+i+'.4');
+			}		
+			h.freeze();
+			h.undo();
+			h.redo();
+			h.unfreeze();
+			h.undo();
+			h.redo();
+			ok(fn.called);
+			equal(fn.returnValues[0],null);
+			equal(fn1.returnValues[0],null);
+			equal(fn.returnValues[1],'test4.4');
+			equal(fn1.returnValues[1],'test5.4');
+			h.clear();
+		});
+		test('history freeze/unfreeze with timer', function(){
+			var mylog = function(d){return d;},
+				h = History(5,mylog),
+				fn = sinon.spy(h,'undo'),
+				fn1 = sinon.spy(h,'redo'),
+				clock = sinon.useFakeTimers();
+			h.init('init3'); 
+			for(var i=1;i<=5;i++){
+				h.save('test'+i+'.4');
+			}		
+			h.freeze(1000);
+			h.undo();
+			h.redo();
+			clock.tick(999);
+			h.undo();
+			h.redo();
+			clock.tick(1000);
+			h.undo();
+			h.redo();
+			ok(fn.called);
+			equal(fn.returnValues[0],null);
+			equal(fn1.returnValues[0],null);
+			equal(fn.returnValues[1],null);
+			equal(fn1.returnValues[1],null);
+			equal(fn.returnValues[2],'test4.4');
+			equal(fn1.returnValues[2],'test5.4');
+			h.clear();
+		});
+	});
+    </script>
+  </body>
+</html>
