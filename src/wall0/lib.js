@@ -1,5 +1,7 @@
 define(function(){
-	var _ = {},
+	var _ = function(element,opt){
+		return _.setNode(element,opt);
+	},
 	//Private function
 	hide = function(element){
 		var display = getPropStyle(element, 'display');
@@ -159,15 +161,11 @@ define(function(){
 		{
 			listStyle = element;
 		} else {
-			var styleObject = element.getAttribute('style');
-			
-			if(_.env.ie8)
-				listStyle = styleObject;
-			else if(_.env.ie)
-				listStyle = styleObject.cssText;
-			else
-				listStyle = styleObject;
-			
+			var listStyle = element.getAttribute('style');
+
+			if(listStyle && typeof listStyle == 'object'){
+				listStyle = listStyle.cssText;
+			}
 		}
 		
 		if(listStyle) {
@@ -229,6 +227,7 @@ define(function(){
 		if(typeof List == "string") {
 			List = _.getObjectOfStyle(List);
 		}
+
 		for(item in List) {
 			if(item.substr(0, 1) != '_') {
 				objStyle[item] = List[item];
@@ -259,37 +258,13 @@ define(function(){
 		}
 		return null;
 	};
-	_.getPageX = function(element){
-		var x = 0;
-		while(element.offsetParent){
-			x += element.offsetLeft;
-			element = element.offsetParent;
-		}
-		return x + element.offsetLeft;
-	};
-	_.getPageY = function(element){
-		var y = 0;
-		while(element.offsetParent){
-			y += element.offsetTop;
-			element = element.offsetParent;
-		}
-		return y + element.offsetTop;
-	};
-	_.getParentX = function(element) {
-		return element.parentNode == element.offsetParent? 
-			element.offsetLeft :
-			_.getPageX(element) - _.getPageX(element.parentNode);
-	};
-	_.getParentY = function(element) {
-		return element.parentNode == element.offsetParent?
-			element.offsetTop :
-			_.getPageY(element) - _.getPageY(element.parentNode);
-	};
+	
 	_.setNode = function(element, List) {
-		if(arguments.length === 0) {
+	
+		if(arguments.length === 0 || element == undefined) {
 			return document.createElement('div');
 		}
-		if(arguments.length == 1) {
+		if(arguments.length == 1 || List == undefined) {
 			List = arguments[0];
 			element = document.createElement(List.tag || List.Tag || 'div');
 			delete List.tag;
@@ -342,8 +317,8 @@ define(function(){
 						break;
 					default:
 						if(item.substr(0, 1) != '_') {
-							if(key == "style") {
-								_.addStyle(element, listAttr[key]);
+							if(item == "style") {
+								_.addStyle(element, List[item]);
 								continue;
 							}
 							element.setAttribute(item, List[item]);

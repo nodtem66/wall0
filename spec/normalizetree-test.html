@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
+          "http\://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+  <head>
+    <title>QUnit/Sinon.JS</title>
+    
+  </head>
+  <body>
+    <div id="test-area" style="position:relative;"></div>
+	<div id="test2-area" style="position:relative;"></div>
+    <script type="text/javascript" src="jquery.js"></script>
+ 
+    <script data-main="../src/wall0/lib" type="text/javascript" src="../src/require.js"></script>
+    <script>
+	
+	require.config({urlArgs: 'v='+ (new Date()).getTime()});
+	require(['normalizetree','lib'],function(normalize,$){
+		var test1 = document.getElementById('test-area');
+		var test2 = document.getElementById('test2-area');
+		var getHeight = function(_root) {
+			var max_height = 0, i, h;
+			for( i = 0, len = _root.childNodes.length; i < len; i++) {
+				h = _root.childNodes[i].offsetHeight + _root.childNodes[i].offsetTop;
+				if(h > max_height){
+					max_height = h;
+				}
+			}
+			//if(DEBUG) {console.log("Page height: "+height);}
+			//height = (height > 300) ? height : 300;
+			return max_height;
+		};
+		test2.innerHTML = test1.innerHTML = '<p>test</p><span>test</span><img src="http\://www.cs.sci.ku.ac.th/sites/default/files/pictures/picture-91.gif"/><img src="http\://www.cs.sci.ku.ac.th/sites/default/files/pictures/picture-91.gif"/><img src="http\://www.cs.sci.ku.ac.th/sites/default/files/pictures/picture-91.gif"/><img src="http\://www.cs.sci.ku.ac.th/sites/default/files/pictures/picture-91.gif"/>';
+		setTimeout(function(){
+			normalize(test1);
+			$.addStyle(test1,{'height':getHeight(test1)+'px'});
+		}, 300);
+		
+	});
+    </script>
+  </body>
+</html>

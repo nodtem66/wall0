@@ -1,3 +1,4 @@
-.project
-.pydevproject
-.settings
+.project/
+.pydevproject/
+.settings/
+php/
