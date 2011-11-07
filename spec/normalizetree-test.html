@@ -29,7 +29,8 @@
 			//height = (height > 300) ? height : 300;
 			return max_height;
 		};
-		test2.innerHTML = test1.innerHTML = '<p>test</p><span>test</span><img src="http\://www.cs.sci.ku.ac.th/sites/default/files/pictures/picture-91.gif"/><img src="http\://www.cs.sci.ku.ac.th/sites/default/files/pictures/picture-91.gif"/><img src="http\://www.cs.sci.ku.ac.th/sites/default/files/pictures/picture-91.gif"/><img src="http\://www.cs.sci.ku.ac.th/sites/default/files/pictures/picture-91.gif"/>';
+		//test2.innerHTML = test1.innerHTML = '<p>test</p><span>test</span><img src="http\://www.cs.sci.ku.ac.th/sites/default/files/pictures/picture-91.gif"/><img src="http\://www.cs.sci.ku.ac.th/sites/default/files/pictures/picture-91.gif"/><img src="http\://www.cs.sci.ku.ac.th/sites/default/files/pictures/picture-91.gif"/><img src="http\://www.cs.sci.ku.ac.th/sites/default/files/pictures/picture-91.gif"/>';
+		test2.innerHTML = test1.innerHTML = '<b>Test1</b>Test2<img id="1" src="http\://www.siamzip.com/glitter/images/stories/bear/emoticon-bear-020.gif" /><img id="2" src="http\://www.siamzip.com/glitter/images/stories/bear/emoticon-bear-020.gif" /><img id="3" src="http\://www.siamzip.com/glitter/images/stories/bear/emoticon-bear-020.gif" /><img id="4" src="http\://www.siamzip.com/glitter/images/stories/bear/emoticon-bear-020.gif" />';
 		setTimeout(function(){
 			normalize(test1);
 			$.addStyle(test1,{'height':getHeight(test1)+'px'});

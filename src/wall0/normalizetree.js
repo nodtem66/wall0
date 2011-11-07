@@ -4,7 +4,7 @@ define(['lib'],function($){
 			return "";
 		}
 		var queue = [], original_queue = [], i, j, original_len, len, currentNode, currentOriginalNode, flagFloor1 = true, 
-		tempNode, newTree = root.cloneNode(true),top,left,role;
+		tempNode, newTree = root.cloneNode(true),top,left,display,role;
 		
 		queue.push(newTree); 
 		original_queue.push(root);
@@ -45,7 +45,27 @@ define(['lib'],function($){
 				i < len && j < original_len;
 				i++, j++) {
 				
-				if(currentNode.childNodes[i].nodeName != "#text" && currentNode.childNodes[i].nodeName != "#comment") {
+				if(currentNode.childNodes[i].nodeName == '#comment') continue;
+				
+				if(currentNode.childNodes[i].nodeName == '#text'){
+					if(/[\S]/ig.test(newTree.childNodes[i].nodeValue)) {
+						if(flagFloor1)
+						{
+							//build #text wrapper
+							tempNode = $.setNode({
+								tag: 'span',
+								html: newTree.childNodes[i].nodeValue
+							});
+							newTree.insertBefore(tempNode, newTree.childNodes[i]);
+							newTree.removeChild(newTree.childNodes[i+1]);
+							i--; j--;
+						}
+					} else {
+						newTree.removeChild(newTree.childNodes[i]);
+						len--;
+					}
+				} else {
+					
 					if(currentNode.childNodes[i].getAttribute("role")) {
 						continue;
 					}
@@ -82,14 +102,40 @@ define(['lib'],function($){
 								len--;
 								continue;
 							} else if(flagFloor1) {
+								left=top=0;
+								tempNode = currentOriginalNode.childNodes[j]
+								if(tempNode.offsetTop){
+									top = tempNode.offsetTop;
+									left = tempNode.offsetLeft;
+								} else if(j>0) {
+									tempNode = currentOriginalNode.childNodes[j-1];
+									display = $.getPropStyle(tempNode,'display');
+									if(display.indexOf('inline') >= 0){ //display inline
+										top = tempNode.offsetTop;
+										left = tempNode.offsetLeft + tempNode.offsetWidth; 
+										if(left > document.offsetWidth){
+											top += tempNode.offsetHeight;
+											left = 0;
+										}
+									} else { //display block
+										top = tempNode.offsetTop + tempNode.offsetHeight
+											+ parseInt($.getPropStyle(tempNode,'margin-top')) 
+											+ parseInt($.getPropStyle(tempNode,'margin-bottom'))
+											+ parseInt($.getPropStyle(tempNode,'padding-top'))
+											+ parseInt($.getPropStyle(tempNode,'padding-bottom'));
+										left = 0;
+									}
+									
+								}
+								
 								if(currentNode.childNodes[i].nodeName.toLowerCase() != "div") {
 									tempNode = currentNode.childNodes[i].cloneNode(true);
 									tempNode = $.setNode().appendChild(tempNode).parentNode;
 									tempNode = $.setNode({
 										"role" : 'text',
-										"style" : {"position":"absolute","top": currentOriginalNode.childNodes[j].offsetTop + "px",
-												"left": currentOriginalNode.childNodes[j].offsetLeft + "px","overflow":"hidden"}
+										"style" : {"position":"absolute","top": top + "px","left": left + "px","overflow":"hidden"}
 									}).appendChild(tempNode).parentNode;
+
 									if(newTree.childNodes.length === 0) {
 										newTree.appendChild(tempNode);
 									} else {
@@ -99,8 +145,8 @@ define(['lib'],function($){
 								} else {
 									$.setNode(newTree.childNodes[i], {
 										"role" : 'text',
-										"style" : {"position":"absolute","top": currentOriginalNode.childNodes[j].offsetTop + "px",
-												"left": currentOriginalNode.childNodes[j].offsetLeft + "px","overflow":"hidden"}
+										"style" : {"position":"absolute","top": top + "px",
+												"left": left + "px","overflow":"hidden"}
 									});
 								}
 							}
@@ -119,25 +165,6 @@ define(['lib'],function($){
 
 		for( i = 0, len = newTree.childNodes.length; i < len; i++) {
 			
-			if(newTree.childNodes[i].nodeName == "#text") {
-				if(/[\S]/ig.test(newTree.childNodes[i].nodeValue)) {					
-					//build #text wrapper
-					tempNode = $.setNode({
-						tag : "div",
-						"role" : "pre-text",
-						"style" : "position:absolute;",
-						html : "<div>" + newTree.childNodes[i].nodeValue + "</div>"
-					});
-					newTree.removeChild(newTree.childNodes[i]);
-					newTree.appendChild(tempNode);
-				} else {
-					newTree.removeChild(newTree.childNodes[i]);
-					len--;
-				}
-				i--;
-				
-				continue;
-			}
 			$.addStyle(newTree.childNodes[i], {
 				"position" : "absolute",
 				"overflow" : "hidden",
@@ -149,6 +176,7 @@ define(['lib'],function($){
 
 		root.innerHTML = newTree.innerHTML;
 		//loop for pre text
+		
 		for(i=0;i<len;i++){
 			if(i > 0 && root.childNodes[i].getAttribute('role') == 'pre-text'){
 				tempNode = root.childNodes[i-1];

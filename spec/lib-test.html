@@ -104,8 +104,8 @@
     	});
     	test("class=\" apple  banana \"", function(){
     		var fn = sinon.spy(lib0, "getArrayOfClassNames");
-    		fn({"className": " apple  banana "});
-    		deepEqual(fn.returnValues[0], ["apple","banana"], "['apple','banana']");
+    		fn({"className": " apple  ban0ana-a "});
+    		deepEqual(fn.returnValues[0], ["apple","ban0ana-a"], "['apple','ban0ana-a']");
     		fn.restore();
     	});
     	
@@ -223,15 +223,7 @@
 			equal(parseInt(lib0.getPropStyle(elm.firstChild,'width')),100);
 			elm.innerHTML = "";
 		});
-		test("get x,y from ", function(){
-			var elm = $("#test-area")[0];
-			elm.innerHTML = "<p style=\"width: 100px;color: red; height: 200px;\"><\/p>";
-			notEqual(lib0.getPageX(elm.firstChild),undefined);
-			notEqual(lib0.getPageY(elm.firstChild),undefined);
-			notEqual(lib0.getParentX(elm.firstChild),undefined);
-			notEqual(lib0.getParentY(elm.firstChild),undefined);
-			elm.innerHTML = "";
-		});
+		
     	
     	module("lib0.setNode");
     	test("build p with style\"color:red;\" and text \"hello world\"",function(){

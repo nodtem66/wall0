@@ -247,14 +247,16 @@ define(function(){
 		_.setObjectOfStyle(element, objStyle);
 	};
 	_.getPropStyle = function(element, prop){
-		if(element.style[prop])
-			return element.style[prop];
-		else if(element.currentStyle)
-			return element.currentStyle[prop];
-		else if(document.defaultView && document.defaultView.getComputedStyle){
-			prop = prop.replace(/([A-Z])/g,'-$1').toLowerCase();
-			var style = document.defaultView.getComputedStyle(element, '');
-			return style && style.getPropertyValue(prop);
+		if(prop && element){			
+			if(element.style[prop])
+				return element.style[prop];
+			else if(element.currentStyle)
+				return element.currentStyle[prop];
+			else if(document.defaultView && document.defaultView.getComputedStyle){
+				prop = prop.replace(/([A-Z])/g,'-$1').toLowerCase();
+				var style = document.defaultView.getComputedStyle(element, '');
+				return style && style.getPropertyValue(prop);
+			}
 		}
 		return null;
 	};
