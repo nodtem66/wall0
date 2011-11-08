@@ -2,20 +2,30 @@
 <html>
 	<head>
 		<title>Test</title>
-		<script type="text/javascript" src="src/wall0/editor.js"></script>
+		<script type="text/javascript" src="build/wall0.js"></script>
 		<script src="../jquery/jquery.js"></script>
 		<script type="text/javascript" src="src/aloha/aloha.js"></script>
-		<script type="text/javascript" src="src/aloha/plugins/com.gentics.aloha.plugins.Format/plugin.js"></script>
-		<script type="text/javascript" src="src/aloha/plugins/com.gentics.aloha.plugins.Table/plugin.js"></script>
-		<script type="text/javascript" src="src/aloha/plugins/com.gentics.aloha.plugins.List/plugin.js"></script>
+		<script type="text/javascript" src=
+			"src/aloha/plugins/com.gentics.aloha.plugins.Format/plugin.js">
+		</script>
+		<script type="text/javascript" src=	
+			"src/aloha/plugins/com.gentics.aloha.plugins.Table/plugin.js">
+		</script>
+		<script type="text/javascript" src=
+			"src/aloha/plugins/com.gentics.aloha.plugins.List/plugin.js">
+		</script>
 		<script>
-			GENTICS.Aloha.EventRegistry.subscribe(GENTICS.Aloha,'editableActivated',function(e){
+		GENTICS.Aloha.EventRegistry.subscribe(GENTICS.Aloha,'editableActivated',
+			function(e){
 				window.console.log('aloha',e);
-			});
-			GENTICS.Aloha.EventRegistry.subscribe(GENTICS.Aloha,'editableDeactivated',function(){
-				//window.wall0.notify('unselected');
-			});
-			GENTICS.Aloha.Editable.prototype.destroy = function() { 
+			}
+		);
+		GENTICS.Aloha.EventRegistry.subscribe(GENTICS.Aloha,'editableDeactivated',
+			function(){
+			//window.wall0.notify('unselected');
+			}
+		);
+		GENTICS.Aloha.Editable.prototype.destroy = function() { 
 			// leave the element just to get sure
 			this.blur();
 			this.ready = false;
@@ -27,7 +37,7 @@
 			this.obj.unbind('focus');
 			this.obj.unbind('keydown');
 			this.obj.unbind('keyup');
-			};
+		};
 		</script>
 	</head>
 	<body>

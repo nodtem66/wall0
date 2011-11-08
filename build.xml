@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project name="wall0" default="product" basedir="./">
+	<description>wall0 ANT build file</description>
+	
+	<target name="load.properties"
+		description="Set properties for this build">
+		<!--JSlint-->
+		<property name="jslint.js" value="${basedir}/tools/jslint.js"/>
+		<!--YUI Compressor location -->
+		<property name="yui.jar" value="${basedir}/tools/" />
+		<!--Mozilla Rhino -->
+		<property name="rhino.jar" value="${basedir}/tools/js.jar"/>
+		<!-- Source JS dir -->
+		<property name="src.dir" value="${basedir}/src/wall0/" />
+		<!-- Output dir -->
+		<property name="build.dir" value="${basedir}/build/" />
+	</target>
+	
+	<target name="init" depends="load.properties">
+		<!--Create the time stamp for the new build-->
+		<tstamp>
+			<format property="TODAY" pattern="EEE, d MMM yyyy HH:mm:ss Z" />
+		</tstamp>
+		<!-- Delete	previous build files -->
+		<delete dir="${build.dir}"/>
+		<!-- Recreate build directories -->
+		<mkdir dir="${build.dir}"/>
+		<mkdir dir="${build.dir}/plugins"/>
+		<!-- Log the build timestamps to file-->
+		<echo file="${build.dir}/build_log.txt" append="false">Build Date: ${TODAY}</echo>
+	</target>
+	
+	<!--JS Lint-->
+	<target name="jslint" depends="load.properties">
+		<echo>Check JS Syntax</echo>
+		<apply executable="java">
+			<arg value="-jar"/>
+			<arg value="${rhino.jar}"/>
+			<arg value="${jslint.js}"/>
+			<srcfile/>
+			<fileset dir="${src.dir}">
+				<include name="*.js"/>
+				<exclude name="core.js"/>
+			</fileset>
+		</apply>
+	</target>
+	
+	<!--Copy and Parse JS Library Files -->
+	<target name="js.import" depends="init">
+		<copy todir="${build.dir}/">
+			<fileset dir="${src.dir}" includes="*.js" excludes="core.js"/>
+			<fileset dir="${src.dir}" includes="*.png"/>
+		</copy>
+		<!-- Parse JS Lib-->
+		<replaceregexp 
+			match="define\(([\S\W]*)\)\;"
+			replace="\1"
+			flags="s"
+			file="${build.dir}/lib.js"/>
+		<replaceregexp 
+			match="define\((?:(?!return)[\S\W])*return ([\S\W]*)\)\;"
+			replace="\1"
+			flags="s">
+			<fileset dir="${build.dir}" includes="*.js" excludes="wall0.js,lib.js"/>
+		</replaceregexp>
+		
+		<echo>Import lib.js</echo>
+		<loadfile srcfile="${build.dir}/lib.js" property="import.lib"/>
+		<echo>Import normalizetree.js</echo>
+		<loadfile srcfile="${build.dir}/normalizetree.js" property="import.normalize"/>
+		<echo>Import history.js</echo>
+		<loadfile srcfile="${build.dir}/history.js" property="import.history"/>
+		<replace file="${build.dir}/wall0.js">
+			<replacefilter token="IMPORT_LIB" value="${import.lib}"/>
+			<replacefilter token="IMPORT_NORMALIZE" value="${import.normalize}"/>
+			<replacefilter token="IMPORT_HISTORY" value="${import.history}"/>
+		</replace>
+		<!-- Comment Console.log-->
+		<replaceregexp
+			match="(console.log\(.*\)\;)"
+			replace="/\*\1\*/"
+			flags="g"
+			file="${build.dir}/wall0.js" />
+		<delete>
+			<fileset dir="${build.dir}" includes="*.js" excludes="wall0.js"/>
+		</delete>
+	</target>
+	
+	
+	<target name="js.minify" depends="js.import">
+		<apply executable="java" parallel="false">
+			
+		</apply>
+	</target>
+	<target name="product" depends="jslint,js.minify">
+	</target>
+	<target name="devel" depends="js.import">
+	</target>
+</project>
