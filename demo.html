@@ -1,50 +1,86 @@
-<!DOCTYPE html>
-<html>
-	<head>
-		<title>Test</title>
-		<script type="text/javascript" src="build/wall0.js"></script>
-		<script src="../jquery/jquery.js"></script>
-		<script type="text/javascript" src="src/aloha/aloha.js"></script>
-		<script type="text/javascript" src=
-			"src/aloha/plugins/com.gentics.aloha.plugins.Format/plugin.js">
-		</script>
-		<script type="text/javascript" src=	
-			"src/aloha/plugins/com.gentics.aloha.plugins.Table/plugin.js">
-		</script>
-		<script type="text/javascript" src=
-			"src/aloha/plugins/com.gentics.aloha.plugins.List/plugin.js">
-		</script>
-		<script>
-		GENTICS.Aloha.EventRegistry.subscribe(GENTICS.Aloha,'editableActivated',
-			function(e){
-				window.console.log('aloha',e);
-			}
-		);
-		GENTICS.Aloha.EventRegistry.subscribe(GENTICS.Aloha,'editableDeactivated',
-			function(){
-			//window.wall0.notify('unselected');
-			}
-		);
-		GENTICS.Aloha.Editable.prototype.destroy = function() { 
-			// leave the element just to get sure
-			this.blur();
-			this.ready = false;
-			
-			this.obj.removeClass('GENTICS_editable');
-			this.obj.removeAttr('contenteditable');
 
-			this.obj.unbind('mousedown');
-			this.obj.unbind('focus');
-			this.obj.unbind('keydown');
-			this.obj.unbind('keyup');
-		};
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"><HTML xmlns:og="http://opengraphprotocol.org/schema/" xmlns:fb="http://www.facebook.com/2008/fbml"><HEAD><meta property="og:title" content="Nodtem32" /><meta property="og:type" content="blog" /><meta property="og:url" content="http://nodtem32.exteen.com/" /><meta property="og:image" content="http://nodtem32.exteen.com/avatar.jpg" /><meta property="og:description" content="smile, breathe, &amp; code slowly" /><meta property="fb:admins" content="1218803980,704434910,patinya" /><meta property="fb:app_id" content="118744258143951" /><title>Nodtem32</title>
+<link rel="microsummary" href="http://g.exteen.com/lastuserentry.ms.xml" /><link rel="stylesheet" href="http://nodtem32.exteen.com/style.css"  type="text/css"/><!-- link rel="stylesheet" href="http://g.exteen.com/s/blogglobal.css" type="text/css"/ -->
+
+        <!-- link rel="stylesheet/less" href="/style12/lib/bootstrap.less"/>
+        <link rel="stylesheet" type="text/css" media="all" href="/style12/css/984.css" />
+        <link rel="stylesheet" type="text/css" media="all" href="/style12/css/orbit-1.2.3.css"/ -->
+
+        <!--<script src="http://code.jquery.com/jquery-1.7.1.min.js" type="text/javascript"></script>-->
+        <!--<script src="/style12/js/jquery.tools.js" type="text/javascript"></script>-->
+        <!-- script src="/style12/js/less-1.1.5.min.js" type="text/javascript"></script -->
+        <!--<script src="/style12/js/bootstrap-dropdown.js" type="text/javascript"></script>-->
+        <!-- script src="/style12/js/jquery.orbit-1.2.3.js" type="text/javascript"></script -->
+		<script src="build/wall0.js" type="text/javascript"></script>
+		
+		<meta name="generator" content="exteen.com" /> 
+
+
+</HEAD>
+<body id='indexpage' class='site'>
+
+<div id="page">
+	<div id="header">
+        <h1><a href="http://nodtem32.exteen.com/">Nodtem32</a></h1>
+        <h2>smile, breathe, & code slowly</h2>
+        <div id="coverimage"></div>
+    </div>
+	<div id="neck"><div class="module" id="pagemenu">
+            <h2>Pages</h2>
+                <ul><li><a href="http://nodtem32.exteen.com/">Home</a></li><li><a href="http://nodtem32.exteen.com/blog-map">Blog Map</a></li><li><a href="http://nodtem32.exteen.com/exteen-help">Exteen Help</a></li><li><a href="http://nodtem32.exteen.com/about">About...</a></li></ul>
+        </div></div>
+    <div id="belly">
+        <div id="sidebar"></div>
+        <div id="content"><div class="entry" id="entry4187287205">
+            	<div class="title">
+                	<h2><a href="http://nodtem32.exteen.com/20111113/smooth-font-with-notepad">Smooth font with Notepad++</a></h2>
+                    <span>
+                      posted on 13 Nov 2011 04:53  by nodtem32&nbsp; in <a href='http://nodtem32.exteen.com/category/Programming'>Programming</a>&nbsp; directory <a href='http://directory.exteen.com/tech'>Tech</a><span> | <a href="http://www.exteen.com/manage/entryeditor.php?eid=4187287205">Edit This</a> </span></span>
+				            
+                </div><div class="post" id="edit1">
+                	
+
+<p>สืบเนื่องจากบทความ <a href="http://nodtem32.exteen.com/20111109/smooth-font-antialias">Smooth Font; AntiAlias</a> จึงเกิดความคิดที่จะนำ GDI++ มาใส่ Notepad++ ในรูปแบบ Plugin และวันนี้ก็ทำเสร็จเรียบร้อย</p>
+
+
+
+<h3>NppGDIpp</h3>
+
+<p>
+
+Smooth edges for screen font in Notepad++<br />
+
+GDI++/FreeType2 (c) 2006-2011 drwatson <a href="http://www18.atwiki.jp/gdiplus2/">http://www18.atwiki.jp/gdiplus2/</a><br />
+
+Released under <a href="http://www.freetype.org/license.html">FreeType license</a>
+
+</p>
+
+<h4>Requirement</h4>
+
+<p><ul><li>Window XP newer <b>x86</b></li></ul></p>
+
+<h4>Download</h4>
+
+<p><ul><li><a href="https://github.com/nodtem66/NppGDIpp/blob/master/NppGDIpp.rar?raw=true">0.0.1</a></li></ul></p>
+
+
+
+<h4>Source code</h4>
+
+<p><a href="https://github.com/nodtem66/NppGDIpp">https://github.com/nodtem66/NppGDIpp</a></p>
+                </div><div class="info"><span class="tag">Tags: <a href='http://www.exteen.com/tag/font'>font</a>, <a href='http://www.exteen.com/tag/monaco'>monaco</a>, <a href='http://www.exteen.com/tag/notepad'>notepad</a>, <a href='http://www.exteen.com/tag/styler'>styler</a>, <a href='http://www.exteen.com/tag/textmate'>textmate</a></span><span class="coms"><a href="http://nodtem32.exteen.com/20111113/smooth-font-with-notepad">8 <span>Comments</span></a></span></div>
+            </div><div class="nav"><a href='http://nodtem32.exteen.com/page/2'>Previous</a> | Next</div></div>
+        <div id="sidebar2"></div>
+    </div><!-- end #belly -->
+	<div id="leg"><div class="module customhtml" id="">
+			<h2></h2>
+		</div></div>
+    <div id="footer">
+    	<p>Powered by <a href="http://www.exteen.com/">exteen blog</a>. You may view this blog <a href="http://nodtem32.exteen.com/rss">RSS</a> or <a href="http://nodtem32.exteen.com/atom">ATOM</a>.</p>
+    </div>
+</div>
+<script>
+		wall0('edit1');
 		</script>
-	</head>
-	<body>
-		<textarea style="width:500px" id="elm1" name="elm1" rows="10" cols="30">
-			
-			<b>Test1</b>Test2<img id="1" src="http://www.siamzip.com/glitter/images/stories/bear/emoticon-bear-020.gif" /><img id="2" src="http://www.siamzip.com/glitter/images/stories/bear/emoticon-bear-020.gif" /><img id="3" src="http://www.siamzip.com/glitter/images/stories/bear/emoticon-bear-020.gif" /><img id="4" src="http://www.siamzip.com/glitter/images/stories/bear/emoticon-bear-020.gif" />
-		</textarea>
-		<input type="button" value="Enable WYSIWYG editor" onclick="wall0('elm1');" />
-	</body>
-</html>
+</body></html>

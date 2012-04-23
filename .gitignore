@@ -3,3 +3,5 @@
 .settings/
 php/
 src/aloha/
+src/codemirror/
+src/tiny_mce/

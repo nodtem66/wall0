@@ -1,23 +1,28 @@
-define(function () {
+define(function() {
 	var my = function (element, opt) {
 		return my.setNode(element, opt);
 	},
 	//Private function
 		hide = function (element) {
-			var display = getPropStyle(element, 'display');
+			var display = my.getPropStyle(element, 'display');
 			if (display !== 'none') {
 				element.myoldDisplay = display;
 			}
 			element.style.display = 'none';
+			element.visible = false;
 		},
 		show = function (element) {
-			var display = getPropStyle(element, 'display');
+			var display = my.getPropStyle(element, 'display');
 			if (display === 'none') {
-				if (element.myoldDisplay === 'none') {
+				if (!element.myoldDisplay || element.myoldDisplay === 'none') {
 					element.style.display = 'block';
 				} else {
 					element.style.display = element.myoldDisplay;
 				}
+				if (element.myoldDisplay) {
+					delete element.myoldDisplay;
+				}
+				element.visible = true;
 			}
 		};
 	//Public function
@@ -31,7 +36,21 @@ define(function () {
 		webkit : /Webkit/i.test(navigator.userAgent),
 		camino : /Camino/i.test(navigator.userAgent)
 	};
-
+	my.viewport = (function ()
+	{
+		var e = window
+		, a = 'inner';
+		if ( !( 'innerWidth' in window ) )
+		{
+			a = 'client';
+			e = document.documentElement || document.body;
+		}
+		return {
+				width : e[ a+'Width' ], 
+				height : e[ a+'Height' ]
+			};
+	})();
+	
 	my.addEvent = function (element, eventType, callback) {
 		eventType = eventType.toLowerCase();
 		if (element.addEventListener) {
@@ -243,7 +262,7 @@ define(function () {
 	};
 	my.getPropStyle = function (element, prop) {
 		if (prop && element) {
-			if (element.style[prop]) {
+			if (element.style && element.style[prop]) {
 				return element.style[prop];
 			} else if (element.currentStyle) {
 				return element.currentStyle[prop];
@@ -408,7 +427,8 @@ define(function () {
 				return 'text';
 			}
 		} else if (typeof element === 'string') {
-			if (/^<(\w+)[\s\w\=\"\']*>.*<\/\1>$/i.test(element) === false && /^<(\w+)[\s\w\=\"\']*\/>$/i.test(element) === false) {
+			if (/^<(\w+)( [\S\W]*)?>.*<\/\1>$/i.test(element) === false && /^<(\w+)[\s\w\=\"\'\/\:\-\.\_]*>$/i.test(element) === false) {
+				console.log(element);
 				return undefined;
 			} else if (/^<img/i.test(element)) {
 				return 'image';

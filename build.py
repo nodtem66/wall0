@@ -4,14 +4,14 @@
 # (c) 2011 Jirawat I.
 # Licensed under the MIT License.
 #
-
 import re, getopt, sys, os, shutil, time, httplib, urllib, json
 
 base_path = sys.path[0]
 build_path = os.path.join(base_path, "build")
+plugins_path = os.path.join(build_path, "plugins")
 src_path =  os.path.join(base_path, "src\wall0")
-src_excludes = ("core.js","gjs.js")
-import_excludes = ("wall0.js","icon.png")
+src_excludes = ["core.js","gjs.js","plugins"]
+import_excludes = ["wall0.js","icon.gif","plugins","loader.gif"]
 main_js = "wall0.js"
 
 #regex for only lib.js
@@ -40,7 +40,7 @@ lib2_regex = re.compile(r"""define\(	# open define function
 def main():
 	try:
 		opts, args = getopt.getopt(sys.argv[1:], 
-			"hcqb",["help","clean","queue","build"])
+			"hcqb:",["help","clean","queue","build="])
 	except getopt.GetoptError, err:
 		print str(err)
 		usage()
@@ -75,10 +75,10 @@ def clean():
 	shutil.rmtree(build_path)
 	os.mkdir(build_path)
 	
-def build(type="devel"):
-	if type not in ("devel","product"):
-		type = "devel"
-		
+def build(type="product"):
+	if type not in ("devel","product","prod"):
+		type = "product"
+	clean()
 	print """
 Build	    %(T)s
 BaseDir	    %(P)s
@@ -87,21 +87,23 @@ SrcDir	    %(S)s
 
 Copy files...
 """ % {"T":type,"P":base_path,"B":build_path,"S":src_path}
-
 	#copy all files from src dir to build dir
 	for file in os.listdir(src_path):
-		if file not in src_excludes:
-			shutil.copyfile(os.path.join(src_path,file), 
+		if os.path.isdir(os.path.join(src_path, file)):
+			shutil.copytree(os.path.join(src_path, file), plugins_path)
+		elif file not in src_excludes:
+			shutil.copyfile(os.path.join(src_path, file), 
 				os.path.join(build_path, file))
-	parse()
+	parse(type)
 	cleartemp()
-def parse():
+	
+def parse(type="devel"):
 
-	file_main_js = open(os.path.join(build_path, main_js),'r')
+	file_main_js = open(os.path.join(src_path, main_js),'r')
 	main_js_content = ''.join(file_main_js.readlines())
 	file_main_js.close()
 	file_main_js = open(os.path.join(build_path, main_js),'w')
-	
+
 	for file in os.listdir(build_path):
 		if file not in import_excludes:
 			filename = os.path.join(build_path, file)
@@ -116,20 +118,37 @@ def parse():
 				
 			main_js_content = main_js_content.replace(token, content)
 			tempfile.close()
-	
-	main_js_content = minify(main_js_content)
-	if len(main_js_content.strip()) > 100:
-		print 'Minify success'
+
+	if type in ("product","prod"):
+		print "Minify wall0.js"
+		main_js_content = minify(comment(main_js_content))
+		if len(main_js_content.strip()) > 3:
+			file_main_js.write(main_js_content)
+		for file in os.listdir(plugins_path):
+			print "Minify", file
+			plugins_js = open(os.path.join(plugins_path, file), 'r')
+			plugin_content = ''.join(plugins_js.readlines())
+			plugin_content = minify(comment(plugin_content))
+			plugins_js.close()
+			if len(plugin_content.strip()) > 3:
+				plugins_js = open(os.path.join(plugins_path, file), 'w')
+				plugins_js.write(plugin_content)
+				plugins_js.close()
+	else:
 		file_main_js.write(main_js_content)
 	file_main_js.close()		
-	
+
 def queue():
+	clean()
+	os.mkdir(plugins_path)
 	print "Queue..."
 	m = []; path = []; len = 0;
 	i = 0; manage = managerFile()
 	manage.next()
-	
-	for file in os.listdir(src_path):
+	listfile = os.listdir(src_path)
+	for file in os.listdir(os.path.join(src_path, "plugins")):
+		listfile.append("plugins/"+file)
+	for file in listfile:
 		if file not in src_excludes:
 			path.append(os.path.join(src_path,file))
 			shutil.copyfile(path[len], 
@@ -167,7 +186,7 @@ def	monitorFile(filename, target):
 		newEditTime = (yield)
 		if lastEditTime == newEditTime:
 			continue
-		print 'Update file {}'.format(filename),
+		print 'Update file {}'.format(filename)
 		lastEditTime = newEditTime
 		try:
 			target.send(filename)
@@ -184,6 +203,11 @@ def managerFile():
 		shutil.copy(os.path.join(src_path, filename), 
 			os.path.join(build_path, filename))
 		parse()
+		
+def comment(code):
+	comment_regex = re.compile(r"""(console.log\(.*\)\;)""", re.X | re.M)
+	code = comment_regex.sub('',code)
+	return code
 def minify(code):
 	
 	params_checkerrors = urllib.urlencode([
@@ -204,9 +228,9 @@ def minify(code):
 	response = conn.getresponse()
 	data = json.loads(response.read())
 	if data.has_key('errors'):
-		print "JS Syntax error"
+		print "\tJS Syntax error"
 		for error in data['errors']:
-			print "line  %d %d:( %s ) %s" % (error['lineno'],error['charno'],error['error'],error['line'])
+			print "\tline  %d %d:( %s ) %s" % (error['lineno'],error['charno'],error['error'],error['line'])
 		return ''
 	else:
 		conn.request('POST', '/compile', params_minify, headers)
@@ -216,3 +240,5 @@ def minify(code):
 		return data
 if __name__ == "__main__":
 	main()
+else:
+	print "not main"

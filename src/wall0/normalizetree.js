@@ -115,7 +115,7 @@ define(['lib'], function ($) {
 							} else if (j > 0) {
 								tempNode = currentOriginalNode.childNodes[j - 1];
 								display = $.getPropStyle(tempNode, 'display');
-								if (display.indexOf('inline') >= 0) { //display inline
+								if (display && display.indexOf('inline') >= 0) { //display inline
 									top = tempNode.offsetTop;
 									left = tempNode.offsetLeft + tempNode.offsetWidth;
 									if (left > document.offsetWidth) {
